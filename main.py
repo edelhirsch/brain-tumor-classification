@@ -77,6 +77,7 @@ def build_model():
         x=train_generator,
         epochs=30,
         verbose=2,
+        validation_data=validation_generator,
     )
 
     # history = model.fit_generator(
