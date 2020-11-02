@@ -40,10 +40,12 @@ def build_model():
     model.add(layers.Conv2D(128, (3, 3), activation='relu'))
     model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.Flatten())
-    ### (1) add dropout layer
+    model.add(layers.Dropout(0.5))
     ### (1) L2 regularisation
     model.add(layers.Dense(512, activation='relu'))
     model.add(layers.Dense(4, activation='softmax'))
+
+    ### (2) use pretrained model for feature extraction (VGG16 etc.)
 
     # model.summary()
     model.compile(loss='categorical_crossentropy',
@@ -52,6 +54,7 @@ def build_model():
 
     ### (2) try changing the validation split
     ### (2) play with options of ImageDataGenerator
+    ### () add augmentation featuers of train_datagen explicitly
     train_datagen = ImageDataGenerator(rescale=1. / 255, validation_split=0.15)
     test_datagen = ImageDataGenerator(rescale=1. / 255)
 
