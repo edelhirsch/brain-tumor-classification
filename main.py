@@ -1,8 +1,3 @@
-# This is a sample Python script.
-
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
 import glob
 from keras import layers
 from keras import models
@@ -27,22 +22,27 @@ categories = ['glioma_tumor', 'meningioma_tumor', 'no_tumor', 'pituitary_tumor']
 
 def build_model():
     ### (1) try increasing image size even more (256 is too high)
+    ### set this to 128 to make it go faster:
     img_size = 192
 
     model = models.Sequential()
     model.add(layers.Conv2D(32, (3, 3), activation='relu',
                             input_shape=(img_size, img_size, 1)))
     model.add(layers.MaxPooling2D((2, 2)))
+    model.add(layers.Dropout(0.25))
     model.add(layers.Conv2D(64, (3, 3), activation='relu'))
     model.add(layers.MaxPooling2D((2, 2)))
+    model.add(layers.Dropout(0.25))
     model.add(layers.Conv2D(128, (3, 3), activation='relu'))
     model.add(layers.MaxPooling2D((2, 2)))
+    model.add(layers.Dropout(0.25))
     model.add(layers.Conv2D(128, (3, 3), activation='relu'))
     model.add(layers.MaxPooling2D((2, 2)))
+    model.add(layers.Dropout(0.25))
     model.add(layers.Flatten())
-    model.add(layers.Dropout(0.5))
-    ### (1) L2 regularisation
     model.add(layers.Dense(512, activation='relu'))
+    ### (1) L2 regularisation
+    model.add(layers.Dropout(0.5))
     model.add(layers.Dense(4, activation='softmax'))
 
     ### (2) use pretrained model for feature extraction (VGG16 etc.)
@@ -52,15 +52,19 @@ def build_model():
                   optimizer=optimizers.RMSprop(),
                   metrics=['acc'])
 
+    if not path.exists(data_dir):
+        os.mkdir(data_dir)
+
+    if path.exists(training_dir):
+        shutil.rmtree(training_dir)
+
+    os.mkdir(training_dir)
+
     ### (2) try changing the validation split
     ### (2) play with options of ImageDataGenerator
-    ### () add augmentation featuers of train_datagen explicitly
+    ### (1) add augmentation featuers of train_datagen explicitly
     train_datagen = ImageDataGenerator(rescale=1. / 255, validation_split=0.15)
     test_datagen = ImageDataGenerator(rescale=1. / 255)
-
-    if not path.exists(training_dir):
-        os.mkdir(data_dir)
-        os.mkdir(training_dir)
 
     ### (3) cross validation?
     train_generator = train_datagen.flow_from_directory(
