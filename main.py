@@ -26,31 +26,41 @@ def build_model():
     img_size = 192
 
     model = models.Sequential()
-    model.add(layers.Conv2D(32, (3, 3), activation='relu',
-                            input_shape=(img_size, img_size, 1)))
-    model.add(layers.MaxPooling2D((2, 2)))
+    #
+    model.add(layers.Conv2D(filters = 64, kernel_size = (5,5),padding = 'Same', 
+                     activation ='relu', input_shape = (img_size,img_size,1)))
+    model.add(layers.MaxPool2D(pool_size=(2,2)))
     model.add(layers.Dropout(0.25))
-    model.add(layers.Conv2D(64, (3, 3), activation='relu'))
-    model.add(layers.MaxPooling2D((2, 2)))
+    #
+    model.add(layers.Conv2D(filters = 128, kernel_size = (3,3),padding = 'Same', 
+                     activation ='relu'))
+    model.add(layers.MaxPool2D(pool_size=(2,2), strides=(2,2)))
     model.add(layers.Dropout(0.25))
-    model.add(layers.Conv2D(128, (3, 3), activation='relu'))
-    model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.Dropout(0.25))
-    model.add(layers.Conv2D(128, (3, 3), activation='relu'))
-    model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.Dropout(0.25))
+    #
+    model.add(layers.Conv2D(filters = 128, kernel_size = (3,3),padding = 'Same', 
+                     activation ='relu'))
+    model.add(layers.MaxPool2D(pool_size=(2,2), strides=(2,2)))
+    model.add(layers.Dropout(0.3))
+    #
+    model.add(layers.Conv2D(filters = 128, kernel_size = (2,2),padding = 'Same', 
+                     activation ='relu'))
+    model.add(layers.MaxPool2D(pool_size=(2,2), strides=(2,2)))
+    model.add(layers.Dropout(0.3))
+    
+    #
+    model.add(layers.Conv2D(filters = 256, kernel_size = (2,2),padding = 'Same', 
+                     activation ='relu'))
+    model.add(layers.MaxPool2D(pool_size=(2,2), strides=(2,2)))
+    model.add(layers.Dropout(0.3))
+    
+    # 
     model.add(layers.Flatten())
-    model.add(layers.Dense(512, activation='relu'))
-    ### (1) L2 regularisation
+    model.add(layers.Dense(1024, activation = "relu"))
     model.add(layers.Dropout(0.5))
-    model.add(layers.Dense(4, activation='softmax'))
+    model.add(layers.Dense(4, activation = "softmax"))
+    optimizer = optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999)
+    model.compile(optimizer = optimizer, loss = "categorical_crossentropy", metrics=["accuracy"])
 
-    ### (2) use pretrained model for feature extraction (VGG16 etc.)
-
-    # model.summary()
-    model.compile(loss='categorical_crossentropy',
-                  optimizer=optimizers.RMSprop(),
-                  metrics=['acc'])
 
     if not path.exists(data_dir):
         os.mkdir(data_dir)
@@ -63,7 +73,23 @@ def build_model():
     ### (2) try changing the validation split
     ### (2) play with options of ImageDataGenerator
     ### (1) add augmentation featuers of train_datagen explicitly
-    train_datagen = ImageDataGenerator(rescale=1. / 255, validation_split=0.15)
+    train_datagen = ImageDataGenerator(
+        rescale=1. / 255,
+        validation_split=0.15,
+        zoom_range=0.0,
+        width_shift_range=0.0,
+        height_shift_range=0.0,
+        horizontal_flip=True,  
+
+
+        featurewise_center=False,  
+        samplewise_center=False, 
+        featurewise_std_normalization=False,  
+        samplewise_std_normalization=False,  
+        zca_whitening=False,  
+        rotation_range=0.0,
+        vertical_flip=False
+    )
     test_datagen = ImageDataGenerator(rescale=1. / 255)
 
     ### (3) cross validation?
