@@ -23,7 +23,9 @@ categories = ['glioma_tumor', 'meningioma_tumor', 'no_tumor', 'pituitary_tumor']
 def build_model():
     ### (1) try increasing image size even more (256 is too high)
     ### set this to 128 to make it go faster:
-    img_size = 192
+    img_size = 150
+    epochs = 50
+    batch_size = 40
 
     model = models.Sequential()
     #
@@ -73,10 +75,12 @@ def build_model():
     ### (2) try changing the validation split
     ### (2) play with options of ImageDataGenerator
     ### (1) add augmentation featuers of train_datagen explicitly
+
     train_datagen = ImageDataGenerator(
         rescale=1. / 255,
-        validation_split=0.15,
+        validation_split=0.2,
         zoom_range=0.0,
+        # shear_range=0.0,
         width_shift_range=0.0,
         height_shift_range=0.0,
         horizontal_flip=True,  
@@ -98,10 +102,10 @@ def build_model():
         target_size=(img_size, img_size),
         color_mode='grayscale',
         class_mode='categorical',
-        batch_size=32,
-        save_to_dir=training_dir,
-        save_prefix='',
-        save_format='jpeg',
+        batch_size=batch_size,
+        #save_to_dir=training_dir,
+        #save_prefix='',
+        #save_format='jpeg',
         subset='training'
     )
 
@@ -110,16 +114,23 @@ def build_model():
         target_size=(img_size, img_size),
         color_mode='grayscale',
         class_mode='categorical',
-        batch_size=32,
+        batch_size=batch_size,
         subset='validation'
     )
 
-    history = model.fit(
-        x=train_generator,
-        epochs=30,
-        verbose=2,
+    #history = model.fit(
+        #x=train_generator,
+        #epochs=epochs,
+        #verbose=2,
+        #validation_data=validation_generator,
+    #)
+
+    history = model.fit_generator(
+        train_generator,
+        epochs=epochs,
+        steps_per_epoch=57,
         validation_data=validation_generator,
-    )
+        validation_steps=14)
 
     model.save('brain-tumor-classification.h5')
 
