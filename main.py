@@ -1,3 +1,4 @@
+import cv2
 import glob
 from keras import layers
 from keras import models
@@ -18,12 +19,44 @@ validation_dir = data_dir + "/Validation"
 testing_dir = data_dir + "/Testing"
 
 categories = ['glioma_tumor', 'meningioma_tumor', 'no_tumor', 'pituitary_tumor']
+img_size = 150
 
+training_data = []
+
+
+def create_training_data():
+    if os.path.exists(data_dir):
+        print(f'{data_dir} exists, skipping creation of training data.')
+        return
+
+    print(f'{data_dir} does not exist, creating training data...')
+    os.mkdir(data_dir)
+    os.mkdir(training_dir)
+    ### create testing data
+
+    for category in categories:
+        print(f'creating training data for {category}')
+        new_dir = os.path.join(training_dir, category)
+        os.mkdir(new_dir)
+
+        p = os.path.join(original_training_dir, category)
+        class_num = categories.index(category)
+        for img in os.listdir(p):
+            try:
+                filename = os.path.join(p, img)
+                new_filename = os.path.join(training_dir, category, img)
+                img_array = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
+                new_array = cv2.resize(img_array, (img_size, img_size))
+                written = cv2.imwrite(new_filename, new_array)
+                print(f'resizing {new_filename}: {written}')
+                # training_data.append([new_array, class_num])
+            except Exception as e:
+                print(e)
+                pass
 
 def build_model():
     ### (1) try increasing image size even more (256 is too high)
     ### set this to 128 to make it go faster:
-    img_size = 150
     epochs = 50
     batch_size = 40
 
@@ -64,13 +97,13 @@ def build_model():
     model.compile(optimizer = optimizer, loss = "categorical_crossentropy", metrics=["accuracy"])
 
 
-    if not path.exists(data_dir):
-        os.mkdir(data_dir)
-
-    if path.exists(training_dir):
-        shutil.rmtree(training_dir)
-
-    os.mkdir(training_dir)
+    # if not path.exists(data_dir):
+    #     os.mkdir(data_dir)
+    #
+    # if path.exists(training_dir):
+    #     shutil.rmtree(training_dir)
+    #
+    # os.mkdir(training_dir)
 
     ### (2) try changing the validation split
     ### (2) play with options of ImageDataGenerator
@@ -98,7 +131,7 @@ def build_model():
 
     ### (3) cross validation?
     train_generator = train_datagen.flow_from_directory(
-        original_training_dir,
+        training_dir,
         target_size=(img_size, img_size),
         color_mode='grayscale',
         class_mode='categorical',
@@ -110,7 +143,7 @@ def build_model():
     )
 
     validation_generator = train_datagen.flow_from_directory(
-        original_training_dir,
+        training_dir,
         target_size=(img_size, img_size),
         color_mode='grayscale',
         class_mode='categorical',
@@ -137,5 +170,6 @@ def build_model():
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+    create_training_data()
     build_model()
 
