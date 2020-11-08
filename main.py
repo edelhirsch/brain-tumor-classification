@@ -4,9 +4,12 @@ from keras import layers
 from keras import models
 from keras import optimizers
 from keras.preprocessing.image import ImageDataGenerator
+from keras.utils.np_utils import to_categorical # convert to one-hot-encoding
+import numpy as np
 from os import path
 import os
 import shutil
+from sklearn.model_selection import train_test_split
 
 base_dir = "/home/peter/dev/brain-tumors"
 original_data_dir = base_dir + "/original-data"
@@ -21,15 +24,16 @@ testing_dir = data_dir + "/Testing"
 categories = ['glioma_tumor', 'meningioma_tumor', 'no_tumor', 'pituitary_tumor']
 img_size = 150
 
-training_data = []
 
 
 def create_training_data():
-    if os.path.exists(data_dir):
-        print(f'{data_dir} exists, skipping creation of training data.')
-        return
+    training_data = []
+    x = []
+    y = []
 
-    print(f'{data_dir} does not exist, creating training data...')
+    if os.path.exists(data_dir):
+        shutil.rmtree(data_dir)
+
     os.mkdir(data_dir)
     os.mkdir(training_dir)
     ### create testing data
@@ -49,12 +53,22 @@ def create_training_data():
                 new_array = cv2.resize(img_array, (img_size, img_size))
                 written = cv2.imwrite(new_filename, new_array)
                 print(f'resizing {new_filename}: {written}')
-                # training_data.append([new_array, class_num])
+                training_data.append([new_array, class_num])
             except Exception as e:
                 print(e)
                 pass
 
-def build_model():
+    for features, label in training_data:
+        x.append(features)
+        y.append(label)
+    x = np.array(x).reshape(-1, img_size, img_size)
+    print(x.shape)
+    x = x/255.0
+    x = x.reshape(-1, 150, 150, 1)
+    y = to_categorical(y, num_classes = 4)
+
+
+# def build_model():
     ### (1) try increasing image size even more (256 is too high)
     ### set this to 128 to make it go faster:
     epochs = 50
@@ -129,27 +143,34 @@ def build_model():
     )
     test_datagen = ImageDataGenerator(rescale=1. / 255)
 
-    ### (3) cross validation?
-    train_generator = train_datagen.flow_from_directory(
-        training_dir,
-        target_size=(img_size, img_size),
-        color_mode='grayscale',
-        class_mode='categorical',
-        batch_size=batch_size,
-        #save_to_dir=training_dir,
-        #save_prefix='',
-        #save_format='jpeg',
-        subset='training'
-    )
+    x_train, x_val, y_train, y_val = train_test_split(x, y, test_size=0.2, random_state=42)
+    train_datagen.fit(x_train)
 
-    validation_generator = train_datagen.flow_from_directory(
-        training_dir,
-        target_size=(img_size, img_size),
-        color_mode='grayscale',
-        class_mode='categorical',
-        batch_size=batch_size,
-        subset='validation'
-    )
+    history = model.fit_generator(train_datagen.flow(x_train, y_train, batch_size=batch_size),
+                                  epochs=epochs, validation_data=(x_val, y_val),
+                                  steps_per_epoch=x_train.shape[0] // batch_size)
+
+    ### (3) cross validation?
+    # train_generator = train_datagen.flow_from_directory(
+    #     training_dir,
+    #     target_size=(img_size, img_size),
+    #     color_mode='grayscale',
+    #     class_mode='categorical',
+    #     batch_size=batch_size,
+    #     #save_to_dir=training_dir,
+    #     #save_prefix='',
+    #     #save_format='jpeg',
+    #     subset='training'
+    # )
+    #
+    # validation_generator = train_datagen.flow_from_directory(
+    #     training_dir,
+    #     target_size=(img_size, img_size),
+    #     color_mode='grayscale',
+    #     class_mode='categorical',
+    #     batch_size=batch_size,
+    #     subset='validation'
+    # )
 
     #history = model.fit(
         #x=train_generator,
@@ -158,12 +179,12 @@ def build_model():
         #validation_data=validation_generator,
     #)
 
-    history = model.fit_generator(
-        train_generator,
-        epochs=epochs,
-        steps_per_epoch=57,
-        validation_data=validation_generator,
-        validation_steps=14)
+    # history = model.fit_generator(
+    #     train_generator,
+    #     epochs=epochs,
+    #     steps_per_epoch=57,
+    #     validation_data=validation_generator,
+    #     validation_steps=14)
 
     model.save('brain-tumor-classification.h5')
 
@@ -171,5 +192,5 @@ def build_model():
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     create_training_data()
-    build_model()
+    # build_model()
 
