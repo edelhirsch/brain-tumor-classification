@@ -60,7 +60,8 @@ def build_model():
     model.add(layers.Dense(1024, activation = "relu"))
     model.add(layers.Dropout(0.5))
     model.add(layers.Dense(4, activation = "softmax"))
-    optimizer = optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999)
+    #optimizer = optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999)
+    optimizer = optimizers.Adam()
     model.compile(optimizer = optimizer, loss = "categorical_crossentropy", metrics=["accuracy"])
 
 
@@ -118,19 +119,19 @@ def build_model():
         subset='validation'
     )
 
-    #history = model.fit(
-        #x=train_generator,
-        #epochs=epochs,
-        #verbose=2,
-        #validation_data=validation_generator,
-    #)
-
-    history = model.fit_generator(
-        train_generator,
+    history = model.fit(
+        x=train_generator,
         epochs=epochs,
-        steps_per_epoch=57,
+        verbose=2,
         validation_data=validation_generator,
-        validation_steps=14)
+    )
+
+    #history = model.fit_generator(
+        #train_generator,
+        #epochs=epochs,
+        #steps_per_epoch=57,
+        #validation_data=validation_generator,
+        #validation_steps=14)
 
     model.save('brain-tumor-classification.h5')
 
