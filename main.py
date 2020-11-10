@@ -123,7 +123,7 @@ def build_model():
     model.summary()
 
     model.compile(
-        optimizer=keras.optimizers.Adam(1e-5),
+        optimizer=keras.optimizers.Adam(1e-4),
         loss=keras.losses.CategoricalCrossentropy(from_logits=True),
         metrics=[keras.metrics.CategoricalAccuracy()],
     )
