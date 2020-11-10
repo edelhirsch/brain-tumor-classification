@@ -119,10 +119,11 @@ def build_model():
     outputs = keras.layers.Dense(4)(x)
     model = keras.Model(inputs, outputs)
 
+    base_model.trainable = True
     model.summary()
 
     model.compile(
-        optimizer=keras.optimizers.Adam(),
+        optimizer=keras.optimizers.Adam(1e-5),
         loss=keras.losses.CategoricalCrossentropy(from_logits=True),
         metrics=[keras.metrics.CategoricalAccuracy()],
     )
