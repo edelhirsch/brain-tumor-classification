@@ -23,8 +23,6 @@ training_dir = data_dir + "/Training"
 validation_dir = data_dir + "/Validation"
 testing_dir = data_dir + "/Testing"
 
-categories = ['glioma_tumor', 'meningioma_tumor', 'no_tumor', 'pituitary_tumor']
-
 
 def build_model():
     ### (1) try increasing image size even more (256 is too high)
@@ -44,11 +42,6 @@ def build_model():
                                                                    seed=1337,
                                                                    )
     print(f'classes found: {train_ds.class_names}')
-    print(f'train ds: {train_ds}')
-    for image_batch, labels_batch in train_ds:
-        print(image_batch.shape)
-        print(labels_batch.shape)
-        break
 
     validation_ds = tf.keras.preprocessing.image_dataset_from_directory(original_training_dir,
                                                                         label_mode='categorical',
@@ -77,17 +70,17 @@ def build_model():
         ]
     )
 
-    # for images, labels in train_ds.take(1):
-    #     plt.figure(figsize=(10, 10))
-    #     first_image = images[0]
-    #     for i in range(9):
-    #         ax = plt.subplot(3, 3, i + 1)
-    #         augmented_image = data_augmentation(
-    #             tf.expand_dims(first_image, 0), training=True
-    #         )
-    #         plt.imshow(augmented_image[0].numpy().astype("int32"))
-    #         plt.title(int(labels[i]))
-    #         plt.axis("off")
+    for images, labels in train_ds.take(1):
+        plt.figure(figsize=(10, 10))
+        first_image = images[0]
+        for i in range(10):
+            ax = plt.subplot(2, 5, i + 1)
+            plt.imshow(images[i].numpy().astype("int32"))
+            index = int(tf.math.argmax(labels[i]))
+            plt.title(train_ds.class_names[index])
+            plt.axis("off")
+    plt.show()
+    return
 
     base_model = keras.applications.Xception(
         weights="imagenet",  # Load weights pre-trained on ImageNet.
