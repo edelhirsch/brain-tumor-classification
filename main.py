@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import glob
 import keras
 from keras import layers
@@ -123,7 +125,7 @@ def build_model():
     model.summary()
 
     model.compile(
-        optimizer=keras.optimizers.Adam(1e-4),
+        optimizer=keras.optimizers.Adam(0.00025),
         loss=keras.losses.CategoricalCrossentropy(from_logits=True),
         metrics=[keras.metrics.CategoricalAccuracy()],
     )
