@@ -19,10 +19,13 @@ original_data_dir = base_dir + "/original-data"
 original_training_dir = original_data_dir + "/Training"
 original_testing_dir = original_data_dir + "/Testing"
 
+### We don't need these:
 data_dir = base_dir + "/data"  # use os.path.join
 training_dir = data_dir + "/Training"
 validation_dir = data_dir + "/Validation"
 testing_dir = data_dir + "/Testing"
+
+model_name = 'brain-tumor-classification.h5'
 
 size = (150, 150)
 input_shape = size + (3,)
@@ -63,7 +66,7 @@ def create_datasets():
 
 
 def show_images():
-
+    print('*** Showing images ***')
     train_ds, validation_ds, test_ds = create_datasets()
     for images, labels in train_ds.take(1):
         plt.figure(figsize=(10, 10))
@@ -78,7 +81,7 @@ def show_images():
 
 
 def build_model():
-
+    print('*** Building the model ***')
     train_ds, validation_ds, test_ds = create_datasets()
     data_augmentation = keras.Sequential(
         [
@@ -129,7 +132,7 @@ def build_model():
 
     history = model.fit(train_ds, epochs=epochs, validation_data=validation_ds)
 
-    model.save('brain-tumor-classification.h5')
+    model.save(model_name)
 
     acc = history.history['categorical_accuracy']
     val_acc = history.history['val_categorical_accuracy']
@@ -154,14 +157,38 @@ def build_model():
     plt.show()
 
 
-# Press the green button in the gutter to run the script.
+def test_model():
+    print('*** Testing the model ***')
+    ### check whether model does exist
+    model = keras.models.load_model(model_name)
+    test_ds = tf.keras.preprocessing.image_dataset_from_directory(original_testing_dir,
+                                                                  label_mode='categorical',
+                                                                  color_mode='rgb',
+                                                                  image_size=size,
+                                                                  batch_size=batch_size,
+                                                                 )
+    evaluation = model.evaluate(test_ds)
+    print(evaluation)
+
+
+def predict():
+    print('here implement prediction')
+    ### use model.predict()
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run machine learning for brain tumor classification.')
     parser.add_argument('--show-images', action='store_true', default=False, help='show the first 10 images')
     parser.add_argument('--build-model', action='store_true', default=True, help='builds the model')
+    parser.add_argument('--test-model', action='store_true', default=False, help='tests the model')
+    parser.add_argument('--predict', action='store_true', default=False, help='predicts the model for other files')
     args = parser.parse_args()
 
     if args.show_images:
         show_images()
+    elif args.test_model:
+        test_model()
+    elif args.predict:
+        predict()
     elif args.build_model:
         build_model()
