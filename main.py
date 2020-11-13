@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import argparse
 import glob
 import keras
 from keras import layers
@@ -23,14 +24,13 @@ training_dir = data_dir + "/Training"
 validation_dir = data_dir + "/Validation"
 testing_dir = data_dir + "/Testing"
 
+size = (150, 150)
+input_shape = size + (3,)
+epochs = 20
+batch_size = 32
 
-def build_model():
-    ### (1) try increasing image size even more (256 is too high)
-    ### set this to 128 to make it go faster:
-    size = (150, 150)
-    input_shape = size + (3,)
-    epochs = 20
-    batch_size = 32
+
+def create_datasets():
 
     train_ds = tf.keras.preprocessing.image_dataset_from_directory(original_training_dir,
                                                                    label_mode='categorical',
@@ -59,17 +59,12 @@ def build_model():
                                                                   image_size=size,
                                                                   batch_size=batch_size,
                                                                   )
+    return train_ds, validation_ds, test_ds
 
-    # train_ds = train_ds.cache().batch(batch_size).prefetch(buffer_size=10)
-    # validation_ds = validation_ds.cache().batch(batch_size).prefetch(buffer_size=10)
-    # test_ds = test_ds.cache().batch(batch_size).prefetch(buffer_size=10)
 
-    data_augmentation = keras.Sequential(
-        [
-            layers.experimental.preprocessing.RandomFlip("horizontal"),
-        ]
-    )
+def show_images():
 
+    train_ds, validation_ds, test_ds = create_datasets()
     for images, labels in train_ds.take(1):
         plt.figure(figsize=(10, 10))
         first_image = images[0]
@@ -80,7 +75,16 @@ def build_model():
             plt.title(train_ds.class_names[index])
             plt.axis("off")
     plt.show()
-    return
+
+
+def build_model():
+
+    train_ds, validation_ds, test_ds = create_datasets()
+    data_augmentation = keras.Sequential(
+        [
+            layers.experimental.preprocessing.RandomFlip("horizontal"),
+        ]
+    )
 
     base_model = keras.applications.Xception(
         weights="imagenet",  # Load weights pre-trained on ImageNet.
@@ -130,5 +134,12 @@ def build_model():
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    build_model()
+    parser = argparse.ArgumentParser(description='Run machine learning for brain tumor classification.')
+    parser.add_argument('--show-images', action='store_true', default=False, help='show the first 10 images')
+    parser.add_argument('--build-model', action='store_true', default=True, help='builds the model')
+    args = parser.parse_args()
 
+    if args.show_images:
+        show_images()
+    elif args.build_model():
+        build_model()
