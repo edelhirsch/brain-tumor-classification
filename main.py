@@ -44,7 +44,6 @@ def create_datasets():
                                                                    subset='training',
                                                                    seed=1337,
                                                                    )
-    print(f'classes found: {train_ds.class_names}')
 
     validation_ds = tf.keras.preprocessing.image_dataset_from_directory(original_training_dir,
                                                                         label_mode='categorical',
@@ -134,6 +133,10 @@ def build_model():
 
     model.save(model_name)
 
+    # print('*** Evaluating: ***')
+    # evaluation = model.evaluate(test_ds)
+
+
     acc = history.history['categorical_accuracy']
     val_acc = history.history['val_categorical_accuracy']
 
@@ -165,15 +168,25 @@ def test_model():
                                                                   label_mode='categorical',
                                                                   color_mode='rgb',
                                                                   image_size=size,
-                                                                  batch_size=batch_size,
-                                                                 )
+                                                                  batch_size=batch_size)
     evaluation = model.evaluate(test_ds)
     print(evaluation)
 
 
 def predict():
-    print('here implement prediction')
-    ### use model.predict()
+    print('*** Predicting new data ***')
+    model = keras.models.load_model(model_name)
+    image_path = '/home/peter/dev/brain-tumors/inference-pituitary_tumor.jpg'
+    image = tf.keras.preprocessing.image.load_img(image_path, target_size=size)
+    input_arr = keras.preprocessing.image.img_to_array(image)
+    input_arr = np.array([input_arr])
+
+    train_ds, validation_ds, test_ds = create_datasets()
+
+    predictions = model.predict(input_arr)
+
+    for index, value in zip(train_ds.class_names, predictions[0]):
+        print(f'{index}: {value}')
 
 
 if __name__ == '__main__':
