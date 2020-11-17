@@ -13,11 +13,13 @@ from os import path
 import os
 import shutil
 import tensorflow as tf
+from tensorflow.keras.applications.xception import decode_predictions
 
 base_dir = "/home/peter/dev/brain-tumors"
 original_data_dir = base_dir + "/original-data"
 original_training_dir = original_data_dir + "/Training"
 original_testing_dir = original_data_dir + "/Testing"
+inference_dir = base_dir + "/inference"
 
 ### We don't need these:
 data_dir = base_dir + "/data"  # use os.path.join
@@ -176,17 +178,26 @@ def test_model():
 def predict():
     print('*** Predicting new data ***')
     model = keras.models.load_model(model_name)
-    image_path = '/home/peter/dev/brain-tumors/inference-pituitary_tumor.jpg'
+    image_path = '/home/peter/dev/brain-tumors/inference/pituitary_tumor.jpg'
     image = tf.keras.preprocessing.image.load_img(image_path, target_size=size)
-    input_arr = keras.preprocessing.image.img_to_array(image)
-    input_arr = np.array([input_arr])
+    x = keras.preprocessing.image.img_to_array(image)
+    x = np.expand_dims(x, axis=0)
+
+    predictions = model.predict(x).flatten()
+    #decode_predictions(predictions)
 
     train_ds, validation_ds, test_ds = create_datasets()
 
-    predictions = model.predict(input_arr)
-
-    for index, value in zip(train_ds.class_names, predictions[0]):
+    for index, value in zip(train_ds.class_names, predictions):
         print(f'{index}: {value}')
+
+    plt.figure(figsize=(5, 5))
+    plt.imshow(image)
+    index = np.argmax(predictions)
+    title = os.path.basename(image_path) + "\nprediction: " + train_ds.class_names[index]
+    plt.title(title)
+    plt.axis("off")
+    plt.show()
 
 
 if __name__ == '__main__':
