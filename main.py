@@ -166,12 +166,17 @@ def test_model():
     print('*** Testing the model ***')
     ### check whether model does exist
     model = keras.models.load_model(model_name)
-    test_ds = tf.keras.preprocessing.image_dataset_from_directory(original_testing_dir,
-                                                                  label_mode='categorical',
-                                                                  color_mode='rgb',
-                                                                  image_size=size,
-                                                                  batch_size=batch_size)
-    evaluation = model.evaluate(test_ds)
+
+    train_ds, validation_ds, test_ds = create_datasets()
+    evaluation = model.evaluate(train_ds)
+
+    # test_ds = tf.keras.preprocessing.image_dataset_from_directory(original_testing_dir,
+    #                                                               label_mode='categorical',
+    #                                                               color_mode='rgb',
+    #                                                               image_size=size,
+    #                                                               batch_size=batch_size)
+    # evaluation = model.evaluate(test_ds)
+
     print(evaluation)
 
 
