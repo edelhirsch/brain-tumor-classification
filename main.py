@@ -1,17 +1,11 @@
 #!/usr/bin/python3
 
 import argparse
-import glob
 import keras
 from keras import layers
-from keras import models
-from keras import optimizers
-from keras.preprocessing.image import ImageDataGenerator
 import matplotlib.pyplot as plt
 import numpy as np
-from os import path
 import os
-import shutil
 import tensorflow as tf
 from tensorflow.keras.applications.xception import decode_predictions
 
