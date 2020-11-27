@@ -25,7 +25,7 @@ model_name = 'brain-tumor-classification.h5'
 
 size = (150, 150)
 input_shape = size + (3,)
-epochs = 5
+epochs = 10
 batch_size = 32
 
 
@@ -55,7 +55,7 @@ def create_datasets():
                                                                   label_mode='categorical',
                                                                   color_mode='rgb',
                                                                   image_size=size,
-                                                                  batch_size=1,
+                                                                  batch_size=batch_size,
                                                                   )
     return train_ds, validation_ds, test_ds
 
@@ -81,6 +81,13 @@ def build_model():
     data_augmentation = keras.Sequential(
         [
             layers.experimental.preprocessing.RandomFlip("horizontal"),
+            layers.experimental.preprocessing.RandomFlip("vertical"),
+            layers.experimental.preprocessing.RandomWidth(0.2),
+            layers.experimental.preprocessing.RandomHeight(0.2),
+            layers.experimental.preprocessing.RandomContrast(0.2),
+            layers.experimental.preprocessing.RandomRotation(0.2),
+            layers.experimental.preprocessing.RandomTranslation(height_factor=0.2, width_factor=0.2),
+            layers.experimental.preprocessing.RandomZoom(0.2, 0.2),
         ]
     )
 
