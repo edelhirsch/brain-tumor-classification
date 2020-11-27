@@ -25,7 +25,7 @@ model_name = 'brain-tumor-classification.h5'
 
 size = (150, 150)
 input_shape = size + (3,)
-epochs = 20
+epochs = 5
 batch_size = 32
 
 
@@ -55,7 +55,7 @@ def create_datasets():
                                                                   label_mode='categorical',
                                                                   color_mode='rgb',
                                                                   image_size=size,
-                                                                  batch_size=batch_size,
+                                                                  batch_size=1,
                                                                   )
     return train_ds, validation_ds, test_ds
 
