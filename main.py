@@ -135,10 +135,6 @@ def build_model():
 
     model.save(model_name)
 
-    # print('*** Evaluating: ***')
-    # evaluation = model.evaluate(test_ds)
-
-
     acc = history.history['categorical_accuracy']
     val_acc = history.history['val_categorical_accuracy']
 
@@ -168,15 +164,7 @@ def test_model():
     model = keras.models.load_model(model_name)
 
     train_ds, validation_ds, test_ds = create_datasets()
-    evaluation = model.evaluate(train_ds)
-
-    # test_ds = tf.keras.preprocessing.image_dataset_from_directory(original_testing_dir,
-    #                                                               label_mode='categorical',
-    #                                                               color_mode='rgb',
-    #                                                               image_size=size,
-    #                                                               batch_size=batch_size)
-    # evaluation = model.evaluate(test_ds)
-
+    evaluation = model.evaluate(test_ds)
     print(evaluation)
 
 
