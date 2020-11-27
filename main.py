@@ -25,7 +25,7 @@ model_name = 'brain-tumor-classification.h5'
 
 size = (150, 150)
 input_shape = size + (3,)
-epochs = 20
+epochs = 10
 batch_size = 32
 
 
@@ -120,7 +120,7 @@ def build_model():
     model.summary()
 
     model.compile(
-        optimizer=keras.optimizers.Adam(0.00025),
+        optimizer=keras.optimizers.Adam(0.0005),
         loss=keras.losses.CategoricalCrossentropy(from_logits=True),
         metrics=[keras.metrics.CategoricalAccuracy()],
     )
