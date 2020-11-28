@@ -25,7 +25,7 @@ model_name = 'brain-tumor-classification.h5'
 
 size = (150, 150)
 input_shape = size + (3,)
-epochs = 10
+epochs = 30
 batch_size = 32
 
 
