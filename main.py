@@ -75,6 +75,8 @@ def show_images():
     plt.show()
 
 
+# adapted from https://keras.io/guides/transfer_learning/
+
 def build_model():
     print('*** Building the model ***')
     train_ds, validation_ds, test_ds = create_datasets()
